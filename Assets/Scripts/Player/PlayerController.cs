@@ -10,6 +10,7 @@ namespace Game
     {
         [field: SerializeField] public ModelPlayer _modelPlayer { get; private set; }
         [SerializeField] private Transform[] _points;
+        [SerializeField] Transform playerObj;
         private Player _player;
         private int _currentPointsIndex = 0;
         private Vector2 touchPosition;
@@ -22,11 +23,24 @@ namespace Game
         }
         public void OnFixedUpdate()
         {
-            if(_currentPointsIndex >= _points.Length) 
+            if (_currentPointsIndex == _points.Length)
+            {
+                _player.GameManager._windowWin.gameObject.SetActive(true);
                 return;
+            }
+            if(_player.GameManager._windowLose.gameObject.activeSelf)
+            {
+                return;
+            }
+            if (_player.GameManager._windowTutorial != null && _player.GameManager._windowTutorial.gameObject.activeSelf)
+            {
+                return;
+            }
+            if (_currentPointsIndex >= _points.Length)
+                return;              
 
             MoveTowardsTarget();
-            //Move();
+            Move();
         }
         private void Move()
         {
@@ -44,12 +58,12 @@ namespace Game
         }
         private void MoveTowardsTarget()
         {
-            Vector3 direction = (_points[_currentPointsIndex].localPosition - _player.transform.localPosition).normalized;
+            Vector3 direction = (_points[_currentPointsIndex].localPosition - playerObj.transform.localPosition).normalized;
             Vector3 movement = direction * _modelPlayer.Speed * Time.deltaTime;
 
-            _player.transform.localPosition += movement;
+            playerObj.transform.localPosition += movement;
 
-            if (Vector3.Distance(_player.transform.localPosition, _points[_currentPointsIndex].localPosition) < 0.1f)
+            if (Vector3.Distance(playerObj.transform.localPosition, _points[_currentPointsIndex].localPosition) < 0.1f)
             {
                 _currentPointsIndex++;
                 if (_currentPointsIndex < _points.Length)
@@ -62,16 +76,16 @@ namespace Game
         {
             yield return new WaitForSeconds(0.1f);
 
-            Vector3 direction = (_points[_currentPointsIndex].localPosition - _player.transform.localPosition).normalized;
+            Vector3 direction = (_points[_currentPointsIndex].localPosition - playerObj.transform.localPosition).normalized;
             Quaternion targetRotation = Quaternion.LookRotation(direction);
 
-            while (Quaternion.Angle(_player.transform.localRotation, targetRotation) > 0.1f)
+            while (Quaternion.Angle(playerObj.transform.localRotation, targetRotation) > 0.1f)
             {
-                _player.transform.localRotation = Quaternion.Slerp(_player.transform.localRotation, targetRotation, Time.deltaTime * _modelPlayer.RotateSpeed);
+                playerObj.transform.localRotation = Quaternion.Slerp(playerObj.transform.localRotation, targetRotation, Time.deltaTime * _modelPlayer.RotateSpeed);
                 yield return null;
             }
 
-            _player.transform.localRotation = targetRotation;
+            playerObj.transform.localRotation = targetRotation;
         }
 
     }
@@ -84,5 +98,6 @@ namespace Game
         public float Sensetivity;
         public int TotalMoney;
         public int[] TotalMoneyForUp;
+        public string[] NameStatus;
     }
 }

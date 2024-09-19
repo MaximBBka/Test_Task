@@ -9,10 +9,12 @@ namespace Game
     {
         [SerializeField] private TypeGate gate;
         [SerializeField] private Animator _animator;
+        [SerializeField] private AudioManager _audioManager;
         private void OnTriggerEnter(Collider other)
         {
             if (other.TryGetComponent<Player>(out Player player))
             {
+                _audioManager.Sound.PlayOneShot(_audioManager.Gate);
                 _animator.SetTrigger("IsOpen");
                 if (gate == TypeGate.Poor)
                 {
@@ -31,6 +33,7 @@ namespace Game
     }
     public enum TypeGate
     {
+        None,
         Poor,
         Rich,
         SuperRich
